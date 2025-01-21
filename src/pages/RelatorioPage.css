@@ -1,0 +1,119 @@
+.relatorio-page-container{
+    display: flex;
+    justify-content: center;
+    margin: 10px 20px;
+}
+
+.card-relatorio {
+    max-width: 100%;
+    background-color: #1a1a1e;
+    border-radius: 15px;
+    box-shadow: 8px 8px 16px rgba(0,0,0, 0.5);
+}
+
+.card-relatorio img{
+    height: 45px;
+}
+
+.card{
+  border: #f3f3f30c;
+  padding: 1rem 5rem;
+}
+
+.tables{
+  width: 100%;
+  border-color: #f3f3f30c;
+    
+}
+
+.p-datatable thead th {
+    font-weight: 600;
+    font-size: 1.12rem;
+    text-transform: lowercase !important;
+    align-items: center !important;
+    text-align: center !important;
+    padding: 2px 30px;
+    
+}
+
+.qtd-title{
+  color: #d4edda;
+}
+
+.p-datatable tbody tr, .p-datatable thead th {
+    color:#fffff5d2;
+    border-color: #04b200;
+}
+
+.p-datatable-header {
+    border-color: #f3f3f30c;
+    border-bottom-color: #04b200;
+}
+
+.p-paginator {
+  padding: 0.5rem;
+  border-bottom: #1a1a1e;
+}
+
+
+.p-datatable tbody td{
+    border: 1px solid #f3f3f30c;
+}
+
+.p-datatable tbody td {
+    font-size: 16px;
+    padding: 4px;
+}
+
+.p-paginator-bottom,
+.p-paginator,
+.p-multiselect-label-container, 
+.p-multiselect-trigger, 
+.p-datatable-header, 
+.p-datatable-wrapper,
+.p-datatable thead th,
+.p-paginator-bottom, 
+.p-column-filter,
+.p-paginator,
+.p-datatable tbody td {
+    background-color: #1a1a1e;
+}
+
+
+.bg-success {
+    background-color: #d4edda;
+  }
+  .bg-warning {
+    background-color: #fff3cd;
+  }
+  .bg-danger {
+    background-color: #f8d7da;
+  }
+
+  ::-webkit-scrollbar {
+    width: 0px;
+    height: 12px;
+    border-radius: 0;
+    cursor: not-allowed;
+  }
+  
+  
+  ::-webkit-scrollbar-thumb {
+    border-radius: 2px;
+    background: #04b200;
+  }
+
+  .p-column-filter{
+    margin: 3px;
+    height: 3rem;
+    border-color: #f3f3f30c;
+  }
+
+  .p-column-filter :hover, .p-calendar{
+    border-bottom-color: #04b200;
+  }
+
+  .calendario {
+    background-color: #1a1a1e !important;
+    color: #fffff5d2;
+}

@@ -1,0 +1,30 @@
+.campo-texto {
+    margin: 2rem 0;
+    width: 100%;
+    max-width: 766px;
+    min-width: auto;
+}
+
+.p-float-label, .p-inputnumber-input, .p-dropdownp-label, .p-placeholder,.calendario, .p-filleds{
+    background-color: #1a1a1e;
+    color: #fffff5d2;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+    border: 1px solid #f3f3f30c;
+    -webkit-text-fill-color: #fffff5d2;
+    -webkit-box-shadow: 0 0 0px 1000px #1a1a1e inset;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+.p-autocomplete-input::placeholder {
+    color: #fffff5d2;
+  }

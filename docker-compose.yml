@@ -1,0 +1,18 @@
+
+version: '3'
+services:
+ frontend:
+    build: .
+    container_name: frontend-relatory
+    ports:
+      - "${PORT}:${PORT}"
+    expose:
+      - "${PORT}"
+    env_file:
+      - .env
+    networks:
+      - local-network
+    command: npm run start:prod
+
+networks:
+  local-network:  

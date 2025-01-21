@@ -1,0 +1,26 @@
+ .header { 
+    background-color: #1a1a1e;
+    display: flex;
+    flex-direction: column;
+    width: 100%;  
+}
+
+.menubar-custom .p-menuitem-icon {
+    color: white; 
+    border-bottom: white;
+}
+.menubar-custom .p-menuitem-text {
+    text-decoration: white;
+}
+.p-menuitem-text{
+    color: white;
+}
+
+.menubar-custom .p-menuitem-link:hover {
+    background-color: #04b200; 
+    border-radius: 8;
+}
+
+.menubar-custom .p-menuitem-link .p-menuitem-icon:hover {
+    color: #fffff5d2; 
+}
