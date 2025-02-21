@@ -17,10 +17,12 @@ import { Calendar } from "primereact/calendar";
 import { Button } from "primereact/button";
 import { Tooltip } from 'primereact/tooltip';
 
+import { columns } from './columns'
+import { useReport } from "../hooks/use-reports";
 
 export default function RelatorioPage() {
-  const [items, setItems] = useState([]);
-  const toast = useRef(null);
+  const toast = useRef(null)
+  const { readRelatorio, updateRelatorio, items, setItems } = useReport(toast)
   const dt = useRef(null);
   const [totalQuantidade, setTotalQuantidade] = useState(0);
 
@@ -29,32 +31,6 @@ export default function RelatorioPage() {
     { label: "EM PAUSA", value: "EM PAUSA" },
     { label: "INATIVA", value: "INATIVA" }
   ]);
-  
-  const columns = [
-    
-    { field: "destinacao", header: "Destino" },
-    { field: "responsavel", header: "Responsavel" },
-    { field: "data_entrada", header: "Data de Entrada" },
-    { field: "convenio", header: "Convenio" },
-    { field: "grupo", header: "Grupo" },
-    { field: "layout", header: "Layout" },
-    { field: "solicitante", header: "Solicitante" },
-    { field: "robo", header: "Robo" },
-    { field: "quantidade", header: "Quantidade" },
-    { field: "margem_pma", header: "Margem Pma" },
-    { field: "higienizado", header: "Higienizado" },
-    { field: "origem", header: "Origem" },
-    { field: "nome_lote", header: "Nome Lote" },
-    { field: "dados_bancarios", header: "Dados Bancarios" },
-    { field: "observacao", header: "Observacao" },
-    { field: "data_inativacao", header: "Data da Inativacao" },
-    { field: "status_base", header: "Status da Base" },
-    { field: "variavel", header: "Variavel" },
-    { field: "taxa_entrega", header: "Taxa da Entrega" },
-    { field: "valor", header: "Valor" },
-    { field: "texto", header: "Texto" },
-    { field: "data_criacao", header: "Data Criação" },
-  ];
 
   const [filters, setFilters] = useState({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
@@ -80,82 +56,19 @@ export default function RelatorioPage() {
     taxa_entrega: { value: null, matchMode: FilterMatchMode.CONTAINS },
     valor: { value: null, matchMode: FilterMatchMode.CONTAINS },
     texto: { value: null, matchMode: FilterMatchMode.CONTAINS },
-    
+
   });
 
   useEffect(() => {
-    const readRelatorio = async () => {
-      
-      try {
-        const response = await fetch(
-          `${process.env.REACT_APP_API}/api/relatorios`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        const results = await response.json();
-
-        setItems(results);
-        if (response.status === 200) {
-          console.log("Dados salvo com sucesso");
-        }
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
-    readRelatorio();
+    readRelatorio()
   }, []);
-
-  const updateRelatorio = async (data) => {
-    if (typeof data.taxa_entrega === 'number') {
-      data.taxa_entrega = String(data.taxa_entrega); 
-    }
-    try {
-      const response = await fetch(
-        `${process.env.REACT_APP_API}/api/relatorios/${data.id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
-        }
-      );
-      if (response.status === 204) {
-        toast.current.show({
-          severity: "success",
-          summary: "Relatório atualizado com sucesso!",
-          life: 3000,
-        });
-      } else {
-        const errorText = await response.text();
-        toast.current.show({
-          severity: "danger",
-          summary: "Erro ao enviar o formulário.",
-          detail: errorText,
-          life: 3000,
-        });
-      }
-    } catch (err) {
-      toast.current.show({
-        severity: "info",
-        summary: "Ocorreu algum erro ao enviar o formulário.",
-        life: 3000,
-      });
-      console.error("Erro ao enviar dados:", err);
-    }
-  };
 
   const [visibleColumns, setVisibleColumns] = useState(columns);
   const [globalFilterValue, setGlobalFilterValue] = useState('');
 
   const calculateTotalQuantity = useCallback(() => {
     let filteredItems = [...items];
-  
+
     // Aplicando filtros globais
     if (filters.global.value) {
       filteredItems = filteredItems.filter((item) =>
@@ -164,20 +77,20 @@ export default function RelatorioPage() {
         )
       );
     }
-  
+
     // Aplicando filtros específicos (exemplo: quantidade)
     if (filters.quantidade.value) {
       filteredItems = filteredItems.filter((item) =>
         String(item.quantidade).includes(filters.quantidade.value)
       );
     }
-  
+
     // Somando as quantidades
     const total = filteredItems.reduce((acc, item) => {
       const quantidade = parseFloat(item.quantidade) || 0; // Garantir que quantidade seja um número
       return acc + quantidade;
     }, 0);
-  
+
     setTotalQuantidade(total);
   }, [filters, items]);
 
@@ -196,8 +109,6 @@ export default function RelatorioPage() {
     setFilters(_filters);
     setGlobalFilterValue(value);
   };
-
-  
 
   const onColumnToggle = (event) => {
     let selectedColumns = event.value;
@@ -219,19 +130,24 @@ export default function RelatorioPage() {
   };
 
   const formatCurrency = (value) => {
-    return value.toLocaleString('int');
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(value);
   };
 
-  const onRowEditComplete = (e) => {
-    let _products = [...items];
-    let { newData, index } = e;
-  
-    newData.data_inativacao = newData.data_inativacao ? formatDate(newData.data_inativacao): null;
-    
-    _products[index] = newData;
-    setItems(_products);
-    updateRelatorio(newData);
-  };
+  const onRowEditComplete = useCallback((e) => {
+    setItems(prevItems => {
+      const updatedItems = [...prevItems];
+      let { newData, index } = e;
+
+      newData.data_inativacao = newData.data_inativacao ? formatDate(newData.data_inativacao) : null;
+      updatedItems[index] = newData;
+
+      updateRelatorio(newData);
+      return updatedItems;
+    });
+  }, []);
 
   const getSeverity = (value) => {
     switch (value) {
@@ -249,14 +165,12 @@ export default function RelatorioPage() {
     }
   };
 
-  
-
   const statusEditor = (options) => {
     return (
       <Dropdown
         value={options.value}
         style={{ maxWidth: '12rem' }}
-        options={statuses}
+        options={Array.isArray(statuses) ? statuses : []}
         onChange={(e) => options.editorCallback(e.value)}
         placeholder="Selecione o status."
         itemTemplate={(option) => {
@@ -277,30 +191,28 @@ export default function RelatorioPage() {
       />
     );
   };
-  
-  const statusRowFilterTemplate = (options) => {
-    return (
-      <Dropdown
-        value={options.value}
-        options={statuses}
-        onChange={(e) => options.filterApplyCallback(e.value)}
-        placeholder="Selecione o status"
-        className="p-column-filter"
-        showClear
-        style={{ minWidth: '12rem' }}
-        showFilterMenu={false}
-      />
-    );
-  };
 
-  
+  const statusRowFilterTemplate = useCallback((options) => (
+    <Dropdown
+      value={options.value}
+      options={Array.isArray(statuses) ? statuses : []}
+      onChange={(e) => options.filterApplyCallback(e.value)}
+      placeholder="Selecione o status"
+      className="p-column-filter"
+      showClear
+      style={{ minWidth: '12rem' }}
+      showFilterMenu={false}
+    />
+  ), [statuses]);
+
+
 
   const inativacaoEditor = (options) => {
     return (
       <Calendar
         inputClassName="calendario placeholder-[#fffff5d2] hover:border-b-green-1000 border-[#f3f3f30c]"
         value={options.value ? new Date(options.value) : null}
-        onChange={(e) => options.editorCallback(e.value)}
+        onChange={(e) => options.editorCallback(e.value ? formatDate(e.value) : null)}
         placeholder="Selecione a data"
         dateFormat="dd/mm/yy"
         showIcon
@@ -323,33 +235,36 @@ export default function RelatorioPage() {
       <>
         <span
           className="ellipsis-text"
-          data-pr-tooltip={rowData[field]}
+          data-pr-tooltip={renderTooltipByTextColumn(rowData, field)}
           data-pr-position="top"
-          data-pr-tooltip-options={`tooltipClassName: 'custom-tooltip'`} 
+          data-pr-tooltip-options={`tooltipClassName: 'custom-tooltip'`}
         >
           {rowData[field]}
         </span>
-        
+
         <Tooltip target=".ellipsis-text" />
       </>
     );
   };
 
-  
-  
+  const renderTooltipByTextColumn = (rowData, field) => {
+    const acceptsColumns = ['texto', 'observacao']
+    return acceptsColumns.includes(field) ? rowData[field] : null
+  } 
+
   const renderHeader = () => {
     return (
       <div className="flex flex-wrap justify-between items-center space-x-2">
         <MultiSelect
           value={visibleColumns}
-          options={columns}
+          options={Array.isArray(columns) ? columns : []}
           optionLabel="header"
           onChange={onColumnToggle}
           className="w-full sm:w-1/4 md:w-1/6 rounded-md border hover:border-b-green-1000 border-[#303035]"
           display="chip"
           placeholder="Select Columns"
         />
-  
+
         <IconField iconPosition="left" className="w-full sm:w-3/4 md:w-4/12  flex justify-content-end">
           <InputIcon className="pi pi-search" />
           <InputText
@@ -359,24 +274,24 @@ export default function RelatorioPage() {
             className="w-full rounded-md bg-[#1a1a1e] hover:border-b-green-1000 text-white border-[#303035]"
           />
         </IconField>
-        
+
         <h3 className="qtd-title">Quantidade de Mailings: {formatCurrency(totalQuantidade)}</h3>
 
         <Button label="Exportar" icon="pi pi-upload" onClick={() => dt.current.exportCSV()} />
       </div>
     );
   };
-  
+
   const header = renderHeader();
 
   return (
     <div className="relatorio-page-container place-items-center p-0">
       <Card className="card-relatorio border border-[#f3f3f30c] bg-[#1a1a1e]">
         <Toast ref={toast} />
-          <h2 className="flex text-4xl md:text-center justify-center font-semibold text-white">
-            <img src=".\images\relatorio-financeiro.png" alt="" />
-            Tabela de Relatorios
-          </h2>
+        <h2 className="flex text-4xl md:text-center justify-center font-semibold text-white">
+          <img src=".\images\relatorio-financeiro.png" alt="" />
+          Tabela de Relatorios
+        </h2>
         <section className="w-full m-1 border border-[#f3f3f30c] flex-1">
           <div className="w-full">
             <DataTable
@@ -387,9 +302,10 @@ export default function RelatorioPage() {
               filterDisplay="row"
               value={items}
               onRowEditComplete={onRowEditComplete}
+
               scrollable
               paginator
-              rows={20}
+              rows={10}
               editMode="row"
               tableStyle={{ width: "100%", minWidth: "20rem", height: "5rem" }}
             >
@@ -399,14 +315,12 @@ export default function RelatorioPage() {
                   field={col.field}
                   header={col.header}
                   sortable
-                  filter={filters}
+                  filter={filters[col.field]}
                   filterMenuStyle={{ width: '14rem' }}
                   showFilterMenu={false}
                   filterPlaceholder={`Buscar: ${col.header}`}
                   body={(rowData) =>
-                    col.field === "status_base"
-                      ? statusBodyTemplate(rowData)
-                      : renderTooltipContent(rowData, col.field)
+                    col.field === "status_base" ? statusBodyTemplate(rowData) : renderTooltipContent(rowData, col.field)
                   }
                   editor={(options) => {
                     if (col.field === "status_base") {
@@ -418,12 +332,12 @@ export default function RelatorioPage() {
                     } else {
                       return null;
                     }
-                   
+
                   }}
                   filterElement={
-                    col.field === "status_base" 
-                      ? statusRowFilterTemplate 
-                        : undefined
+                    col.field === "status_base"
+                      ? statusRowFilterTemplate
+                      : undefined
                   }
                   style={{
                     minWidth: '12rem',
