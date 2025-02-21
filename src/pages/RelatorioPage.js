@@ -305,7 +305,7 @@ export default function RelatorioPage() {
 
               scrollable
               paginator
-              rows={10}
+              rows={5}
               editMode="row"
               tableStyle={{ width: "100%", minWidth: "20rem", height: "5rem" }}
             >
